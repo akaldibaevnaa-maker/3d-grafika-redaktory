@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Үш өлшемді графика редакторы | 7-сынып</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Three.js және OrbitControls кітапханалары -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- Конфетти эффектісі -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <div class="room-backdrop"></div>
+
+  <!-- Басты Жоғарғы Панель -->
+  <header class="app-header">
+    <div class="logo-container">
+      <div class="robot-avatar">🤖</div>
+      <div class="header-title-box">
+        <h1>Үш өлшемді графика редакторы</h1>
+        <p>Информатика • 7-сынып</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="timer-badge" id="timer-display">45:00</div>
+      <button class="btn-header" id="btn-timer-toggle" onclick="toggleTimer()">▶️ Бастау</button>
+      <button class="btn-header btn-sound" id="btn-sound-toggle" onclick="toggleSound()">🔊 Дыбыс</button>
+    </div>
+  </header>
+
+  <!-- Тақырыптық Модульдер Навигациясы -->
+  <nav class="module-nav-wrapper">
+    <div class="module-nav">
+      <button class="nav-tab-btn active" onclick="switchSection('section-intro', this)">
+        <span class="badge-num">1</span>
+        <span>2D және 3D графика</span>
+      </button>
+      <button class="nav-tab-btn" onclick="switchSection('section-shapes', this)">
+        <span class="badge-num">2</span>
+        <span>Негізгі пішіндер & Робот</span>
+      </button>
+      <button class="nav-tab-btn" onclick="switchSection('section-from-model-to-object', this)" style="border-color: #ba68c8; background: #f3e5f5;">
+        <span class="badge-num" style="background:#7b1fa2; color:white;">3</span>
+        <span>3D модельден нақты бұйымға дейін</span>
+      </button>
+      <button class="nav-tab-btn" onclick="switchSection('section-realworld', this)">
+        <span class="badge-num">4</span>
+        <span>Өмірде қайда қолданылады?</span>
+      </button>
+      <button class="nav-tab-btn" onclick="switchSection('section-grading', this)" style="border-color: #4caf50; background: #e8f5e9;">
+        <span class="badge-num" style="background:#2e7d32; color:white;">⭐</span>
+        <span>Бағалау журналы (10 балл)</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Басты контент ортасы -->
+  <main class="main-container">
+
+    <!-- =========================================================================
+         1-МОДУЛЬ: Үш өлшемді графика дегеніміз не? (Слайд 6)
+         ========================================================================= -->
+    <section id="section-intro" class="lesson-section active">
+      <div class="slide-title-banner">
+        <span class="sparkle-left">✨</span>
+        <h2>Үш өлшемді графика дегеніміз не?</h2>
+        <span class="sparkle-right">✨</span>
+      </div>
+
+      <!-- Анықтама тақтасы -->
+      <div class="definition-badge">
+        <p><strong>3D графика</strong> — ұзындығы, ені және биіктігі бар көлемді бейне.</p>
+      </div>
+
+      <!-- 2D vs 3D Интерактивті Карталары -->
+      <div class="cards-grid-2">
+        <!-- 2D Картасы -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-2d">
+            <span>🟦 2D Графика (Екі өлшемді)</span>
+          </div>
+          <div class="canvas-container" id="canvas-2d">
+            <div class="canvas-overlay-tip">👆 Тек ұзындық пен ен (X, Y)</div>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">Жазық пішіндер: Шаршы және Шеңбер</h4>
+            <p class="card-desc">2D бейнелер тек екі өлшемге ие: ұзындық пен ен ғана. Оларды тек бір жағынан көре аламыз.</p>
+            <div class="shape-real-world">📄 Қағаз бетіндегі сызбалар, фотосуреттер</div>
+          </div>
+        </div>
+
+        <!-- 3D Картасы -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-3d">
+            <span>📦 3D Графика (Үш өлшемді)</span>
+          </div>
+          <div class="canvas-container" id="canvas-3d">
+            <div class="canvas-overlay-tip">🔄 Тінтуірмен 360° айналдырып көріңіз</div>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">Көлемді денелер: Текше (Куб) және Шар</h4>
+            <p class="card-desc">3D нысандар үш өлшемге ие: <strong>ұзындық (X)</strong>, <strong>биіктік (Y)</strong> және <strong>ені (Z)</strong>. Оны әр қырынан қарауға болады.</p>
+            <div class="shape-real-world">🌐 Компьютердегі көлемді денелер, ойындар</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1, 2, 3 Тұжырымдар -->
+      <div class="numbered-points">
+        <div class="point-card">
+          <div class="point-number">1</div>
+          <div class="point-text"><strong>2D</strong> — ұзындық пен ен ғана.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-number">2</div>
+          <div class="point-text"><strong>3D</strong> — ұзындық, ен және биіктік.</div>
+        </div>
+        <div class="point-card">
+          <div class="point-number">3</div>
+          <div class="point-text"><strong>3D модельді</strong> әр қырынан қарауға болады.</div>
+        </div>
+      </div>
+
+      <!-- Мысал блогы және айналатын 3D доп -->
+      <div class="example-banner">
+        <div class="example-tag">Мысал:</div>
+        <div class="example-content">
+          қағаздағы доп суреті — <strong>2D</strong>, компьютердегі айналатын доп — <strong>3D</strong>.
+        </div>
+      </div>
+
+      <div style="max-width: 480px; margin: 25px auto;">
+        <div class="slide-card">
+          <div class="card-header-badge badge-blue">
+            <span>⚽ Интерактивті 3D Футбол добы</span>
+          </div>
+          <div class="canvas-container" id="canvas-soccer-ball" style="height: 230px;">
+            <div class="canvas-overlay-tip">🔄 Тінтуірмен допты айналдырыңыз</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         2-МОДУЛЬ: 3D модельдің негізгі пішіндері (Слайд 8)
+         ========================================================================= -->
+    <section id="section-shapes" class="lesson-section">
+      <div class="slide-title-banner">
+        <span class="sparkle-left">📐</span>
+        <h2>3D модельдің негізгі пішіндері</h2>
+        <span class="sparkle-right">📐</span>
+      </div>
+
+      <div class="definition-badge">
+        <p>Күрделі модельдер <strong>қарапайым геометриялық денелерден</strong> құралады.</p>
+      </div>
+
+      <!-- 5 Негізгі пішін 3D карталары -->
+      <div class="cards-grid-5">
+        <!-- Текше -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-blue">Текше</div>
+          <div class="canvas-container" id="canvas-cube"></div>
+          <div class="card-body">
+            <div class="shape-real-world">📦 Текше — қорап</div>
+          </div>
+        </div>
+
+        <!-- Шар -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-red">Шар</div>
+          <div class="canvas-container" id="canvas-sphere"></div>
+          <div class="card-body">
+            <div class="shape-real-world">⚽ Шар — доп</div>
+          </div>
+        </div>
+
+        <!-- Цилиндр -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-green">Цилиндр</div>
+          <div class="canvas-container" id="canvas-cylinder"></div>
+          <div class="card-body">
+            <div class="shape-real-world">🥛 Цилиндр — стақан</div>
+          </div>
+        </div>
+
+        <!-- Конус -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-yellow">Конус</div>
+          <div class="canvas-container" id="canvas-cone"></div>
+          <div class="card-body">
+            <div class="shape-real-world">🚧 Конус — жол конусы</div>
+          </div>
+        </div>
+
+        <!-- Пирамида -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-purple">Пирамида</div>
+          <div class="canvas-container" id="canvas-pyramid"></div>
+          <div class="card-body">
+            <div class="shape-real-world">🔺 Пирамида — пирамида</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Робот Құрастыру Интерактивті Шеберханасы -->
+      <div class="robot-assembly-box">
+        <div class="example-banner" style="margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+            <div class="example-tag">Мысал:</div>
+            <div class="example-content">
+              роботтың денесін <strong>текшеден</strong>, басын <strong>шардан</strong>, қолын <strong>цилиндрден</strong> құрастыруға болады.
+            </div>
+          </div>
+          <button class="btn-reset-robot" onclick="ThreeScenes.resetRobot()">
+            🔄 Қайтадан жасау
+          </button>
+        </div>
+
+        <div class="assembly-steps-bar">
+          <button class="step-btn active" id="btn-step-1" onclick="selectRobotStep(1)">1. Денесі (Текше)</button>
+          <button class="step-btn" id="btn-step-2" onclick="selectRobotStep(2)">2. Басы (Шар)</button>
+          <button class="step-btn" id="btn-step-3" onclick="selectRobotStep(3)">3. Қолдары (Цилиндр)</button>
+          <button class="step-btn" id="btn-step-4" onclick="selectRobotStep(4)">4. Аяқтары (Цилиндр)</button>
+        </div>
+
+        <div class="canvas-container full-scene" id="canvas-robot-assembly">
+          <div class="canvas-overlay-tip">🤖 Қадамдарды басып, роботты толық құрастырыңыз!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         3-МОДУЛЬ: 3D МОДЕЛЬДЕН НАҚТЫ БҰЙЫМҒА ДЕЙІН (Слайд 11)
+         ========================================================================= -->
+    <section id="section-from-model-to-object" class="lesson-section">
+      <div class="slide-title-banner">
+        <span class="sparkle-left">🚀</span>
+        <h2>3D модельден нақты бұйымға дейін</h2>
+        <span class="sparkle-right">🚀</span>
+      </div>
+
+      <div class="definition-badge">
+        <p>Компьютерде жасалған <strong>3D модельді 3D принтер арқылы</strong> нақты бұйымға айналдыруға болады.</p>
+      </div>
+
+      <!-- 5 Қадамдық визуализация жолағы -->
+      <div class="flow-steps-container">
+        <div class="flow-step-card">
+          <div class="flow-step-badge flow-badge-idea">1. Идея</div>
+          <div style="font-size: 2.5rem; margin: 8px 0;">💡✏️</div>
+          <h4 style="font-size: 1rem; color: #e65100; margin-bottom: 5px;">Эскиз салу</h4>
+          <p style="font-size: 0.82rem; color: #666;">Қағаз бетіне «А» әрпі бар брелоктың сызбасын елестетіп сызамыз.</p>
+        </div>
+
+        <div class="flow-step-card" style="border-color: #0288d1;">
+          <div class="flow-step-badge flow-badge-model">2. 3D модель</div>
+          <div style="font-size: 2.5rem; margin: 8px 0;">💻🔤</div>
+          <h4 style="font-size: 1rem; color: #0277bd; margin-bottom: 5px;">Компьютерде жасау</h4>
+          <p style="font-size: 0.82rem; color: #666;">3D редакторда көлемді «А» әрпін және ілмек тесігін сызамыз.</p>
+        </div>
+
+        <div class="flow-step-card">
+          <div class="flow-step-badge flow-badge-check">3. Тексеру</div>
+          <div style="font-size: 2.5rem; margin: 8px 0;">📏✅</div>
+          <h4 style="font-size: 1rem; color: #2e7d32; margin-bottom: 5px;">Өлшемді тексеру</h4>
+          <p style="font-size: 0.82rem; color: #666;">Модельдің қалыңдығын тексеріп, басуға жібереміз.</p>
+        </div>
+
+        <div class="flow-step-card" style="border-color: #7b1fa2;">
+          <div class="flow-step-badge flow-badge-print">4. 3D принтер</div>
+          <div style="font-size: 2.5rem; margin: 8px 0;">🖨️✨</div>
+          <h4 style="font-size: 1rem; color: #6a1b9a; margin-bottom: 5px;">Басып шығару</h4>
+          <p style="font-size: 0.82rem; color: #666;">Принтер соплосы пластикті балқытып, қабат-қабат өсіреді.</p>
+        </div>
+
+        <div class="flow-step-card">
+          <div class="flow-step-badge flow-badge-ready">5. Дайын бұйым</div>
+          <div style="font-size: 2.5rem; margin: 8px 0;">🔑🎁</div>
+          <h4 style="font-size: 1rem; color: #c62828; margin-bottom: 5px;">Кілт брелогы</h4>
+          <p style="font-size: 0.82rem; color: #666;">Сақина тағылған, нақты өмірде ұстауға болатын зат!</p>
+        </div>
+      </div>
+
+      <!-- 3D Интерактивті Зертхана: Принтер мен Брелок -->
+      <div class="printer-lab-grid">
+        <!-- Сол жақ: 3D Принтердің тірі басу симуляторы -->
+        <div class="printer-box">
+          <div class="card-header-badge badge-purple">
+            <span>🖨️ 3D Принтер зертханасы (Тірі басу процесі)</span>
+          </div>
+          <div class="canvas-container large" id="canvas-3d-printer" style="height: 340px;">
+            <div class="canvas-overlay-tip">🔄 Тінтуірмен принтерді жан-жағынан қараңыз</div>
+          </div>
+          <div class="printer-controls-bar">
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.88rem;">
+              <span>Басылу барысы: <strong id="print-progress-text" style="color: #0288d1;">0%</strong></span>
+              <span id="print-layer-text" style="color: #6a1b9a;">0 / 120 қабат</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="print-progress-bar"></div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+              <button class="btn-game-primary" id="btn-start-print" onclick="ThreeScenes.start3DPrinting()" style="flex: 1; justify-content: center; font-size: 1.05rem; padding: 10px;">
+                ▶️ 3D басуды бастау
+              </button>
+            </div>
+            <div id="print-done-alert" style="display: none; background: #e8f5e9; color: #1b5e20; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-align: center;">
+              🎉 3D Принтер «А» брелогын сәтті басып шығарды! Оң жақтағы дайын бұйымды қараңыз.
+            </div>
+          </div>
+        </div>
+
+        <!-- Оң жақ: Дайын Кілт брелогы -->
+        <div class="keychain-showcase-box">
+          <div class="card-header-badge badge-yellow">
+            <span>🔑 Дайын «А» әрпіндегі кілт брелогы</span>
+          </div>
+          <div class="canvas-container large" id="canvas-keychain" style="height: 340px;">
+            <div class="canvas-overlay-tip">🔄 Брелокты тінтуірмен еркін айналдырып көріңіз</div>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">Жылтыраған көк «А» кілт брелогы</h4>
+            <p class="card-desc">
+              Металл сақинасы мен шынжыры тағылған, нақты өмірде қолдануға арналған керемет 3D кәдесый!
+            </p>
+            <div class="shape-real-world">
+              ✨ Түсі: Көк пластик (PLA/PETG) • Металл сақинасы бар
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="example-banner">
+        <div class="example-tag">Мысал:</div>
+        <div class="example-content">
+          өз атыңның әрпі бар <strong>брелок жасап шығаруға</strong> болады!
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         4-МОДУЛЬ: Компьютерлік модельдер өмірде қайда қолданылады? (Слайд 10)
+         ========================================================================= -->
+    <section id="section-realworld" class="lesson-section">
+      <div class="slide-title-banner">
+        <span class="sparkle-left">🌍</span>
+        <h2>Компьютерлік модельдер өмірде қайда қолданылады?</h2>
+        <span class="sparkle-right">🌍</span>
+      </div>
+
+      <div class="definition-badge">
+        <p><strong>Компьютерлік модель</strong> нақты нысанды алдын ала <strong>көруге</strong> және <strong>зерттеуге</strong> көмектеседі.</p>
+      </div>
+
+      <div class="cards-grid-4">
+        <!-- Сәулет -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-yellow">
+            <span>🏛️ Сәулет</span>
+          </div>
+          <div class="canvas-container" id="canvas-arch">
+            <div class="canvas-overlay-tip">3D Үй моделі</div>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">Үй мен ғимарат жобалау</h4>
+            <p class="card-desc">Құрылыс басталмай тұрып, болашақ үйдің 3D жобасын дәл көруге мүмкіндік береді.</p>
+          </div>
+        </div>
+
+        <!-- Медицина -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-red">
+            <span>🫀 Медицина</span>
+          </div>
+          <div class="canvas-container" id="canvas-med">
+            <div class="canvas-overlay-tip">3D Соғып тұрған жүрек</div>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">Ағза мүшелерін зерттеу</h4>
+            <p class="card-desc">Дәрігерлер адамның жүрегін, сүйектерін 3D модельдеп, оталарға қауіпсіз дайындалады.</p>
+          </div>
+        </div>
+
+        <!-- Инженерия -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-blue">
+            <span>🚗 Инженерия</span>
+          </div>
+          <div class="canvas-container" id="canvas-eng">
+            <div class="canvas-overlay-tip">3D Автокөлік моделі</div>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">Көлік пен құрылғылар</h4>
+            <p class="card-desc">Инженерлер ұшақ, автомобиль және роботтарды жасамас бұрын 3D сынайды.</p>
+          </div>
+        </div>
+
+        <!-- Білім -->
+        <div class="slide-card">
+          <div class="card-header-badge badge-purple">
+            <span>🪐 Білім</span>
+          </div>
+          <div class="canvas-container" id="canvas-edu">
+            <div class="canvas-overlay-tip">3D Ғаламшар (Сатурн)</div>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">Ғаламшарларды үйрену</h4>
+            <p class="card-desc">Күн жүйесін, ғаламшарлар мен денелерді интерактивті көлемді түрде оқу.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="example-banner">
+        <div class="example-tag">Мысал:</div>
+        <div class="example-content">
+          сәулетші үй салынбай тұрып, оның <strong>3D моделін</strong> көрсетеді.
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- =========================================================================
+         ЖАҢА БӨЛІМ: ОҚУШЫЛАРДЫ БАҒАЛАУ ЖУРНАЛЫ (10 БАЛДЫҚ ШКАЛА)
+         ========================================================================= -->
+    <section id="section-grading" class="lesson-section">
+      <div class="slide-title-banner">
+        <span class="sparkle-left">⭐</span>
+        <h2>Оқушыларды бағалау парағы (10 балдық шкала)</h2>
+        <span class="sparkle-right">⭐</span>
+      </div>
+
+      <div class="definition-badge">
+        <p>
+          Әр оқушының сабақтағы белсенділігіне қарай <strong>жұлдызшаларды басып, 10 балға дейін бағалаңыз</strong>. Сабақта жоқ оқушыларға тиісті мәртебені таңдаңыз.
+        </p>
+      </div>
+
+      <!-- Бағалау Журналының Панелі -->
+      <div class="grading-panel-card">
+        <!-- Жоғарғы статистика және батырмалар -->
+        <div class="grading-stats-bar">
+          <div class="stat-pills-group">
+            <div class="stat-pill">
+              <span>👥 Сыныпта:</span>
+              <strong id="stat-total-count">12 оқушы</strong>
+            </div>
+            <div class="stat-pill" style="border-color: #81c784; background: #f1f8e9;">
+              <span>✅ Қатысуда:</span>
+              <strong id="stat-present-count" style="color: #2e7d32;">12</strong>
+            </div>
+            <div class="stat-pill" style="border-color: #ef9a9a; background: #ffebee;">
+              <span>❌ Жоқ оқушы:</span>
+              <strong id="stat-absent-count" style="color: #c62828;">0</strong>
+            </div>
+            <div class="stat-pill" style="border-color: #90caf9; background: #e3f2fd;">
+              <span>📊 Орташа балл:</span>
+              <strong id="stat-avg-score" style="color: #0277bd;">0.0</strong> / 10
+            </div>
+          </div>
+
+          <div class="grading-action-buttons">
+            <button class="btn-grade-action btn-award-all" onclick="GradingSystem.awardAll10()">
+              🌟 Барлығына 10 балл
+            </button>
+            <button class="btn-grade-action" onclick="GradingSystem.resetAll()">
+              🔄 Бағаларды тазарту
+            </button>
+            <button class="btn-grade-action" onclick="GradingSystem.printSheet()">
+              🖨️ Басып шығару
+            </button>
+          </div>
+        </div>
+
+        <!-- 12 Оқушының Интерактивті Кестесі -->
+        <div class="table-responsive">
+          <table class="grading-table">
+            <thead>
+              <tr>
+                <th style="width: 45px; text-align: center;">№</th>
+                <th>Оқушының аты-жөні</th>
+                <th style="width: 260px;">Сабаққа қатысуы</th>
+                <th>Жұлдыздар (1-10 балл)</th>
+                <th style="width: 90px; text-align: center;">+/-</th>
+                <th style="width: 110px; text-align: center;">Балл</th>
+              </tr>
+            </thead>
+            <tbody id="grading-table-body">
+              <!-- 12 оқушы grading.js арқылы шығарылады -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Футер -->
+  <footer class="app-footer">
+    <p>© 2026 «Үш өлшемді графика редакторы» • Информатика 7-сынып</p>
+  </footer>
+
+  <!-- Скрипттер -->
+  <script src="js/audio.js"></script>
+  <script src="js/three-scenes.js"></script>
+  <script src="js/grading.js"></script>
+
+  <script>
+    // Сабақ таймері
+    let timerSecs = 45 * 60;
+    let timerActive = false;
+    let timerInterval = null;
+
+    function toggleTimer() {
+      const btn = document.getElementById('btn-timer-toggle');
+      if (timerActive) {
+        clearInterval(timerInterval);
+        timerActive = false;
+        btn.innerText = '▶️ Бастау';
+      } else {
+        timerActive = true;
+        btn.innerText = '⏸️ Кідірту';
+        timerInterval = setInterval(() => {
+          if (timerSecs > 0) {
+            timerSecs--;
+            const m = Math.floor(timerSecs / 60).toString().padStart(2, '0');
+            const s = (timerSecs % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${m}:${s}`;
+          } else {
+            clearInterval(timerInterval);
+            timerActive = false;
+            alert('⏰ Сабақ уақыты аяқталды!');
+          }
+        }, 1000);
+      }
+    }
+
+    // Қойындыларды ауыстыру навигациясы
+    function switchSection(sectionId, btn) {
+      if (window.sounds) window.sounds.playClick();
+
+      document.querySelectorAll('.lesson-section').forEach(sec => sec.classList.remove('active'));
+      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById(sectionId);
+      if (target) target.classList.add('active');
+      if (btn) btn.classList.add('active');
+
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 50);
+    }
+
+    // Робот құрастыру қадамдары
+    function selectRobotStep(step) {
+      document.querySelectorAll('.assembly-steps-bar .step-btn').forEach((b, idx) => {
+        b.classList.toggle('active', idx + 1 === step);
+        if (idx + 1 < step) b.classList.add('completed');
+      });
+      ThreeScenes.setRobotStep(step);
+    }
+
+    // Дыбысты қосу/өшіру
+    function toggleSound() {
+      const isEnabled = window.sounds.toggle();
+      const btn = document.getElementById('btn-sound-toggle');
+      if (isEnabled) {
+        btn.innerText = '🔊 Дыбыс';
+        btn.classList.remove('muted');
+        window.sounds.playClick();
+      } else {
+        btn.innerText = '🔇 Дыбыссыз';
+        btn.classList.add('muted');
+      }
+    }
+
+    // Бет жүктелгенде сахналар мен бағалау жүйесін іске қосу
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        ThreeScenes.init2Dvs3D();
+        ThreeScenes.initShapes();
+        ThreeScenes.initRobotAssembly();
+        ThreeScenes.initPrinterScene();
+        ThreeScenes.initKeychainScene();
+        ThreeScenes.initLifeScenes();
+        GradingSystem.init();
+      } catch (err) {
+        console.error('Жүйені баптауда қате:', err);
+      }
+    });
+  </script>
+</body>
+</html>

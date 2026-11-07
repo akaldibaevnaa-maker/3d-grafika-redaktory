@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ашық сабаққа шақыру билеті | Үш өлшемді графика - 7 «Ә» сыныбы</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- Three.js and OrbitControls (local with CDN fallback) -->
+  <script src="three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <script src="OrbitControls.js"></script>
+  <script>
+    if (typeof THREE.OrbitControls === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>');
+    }
+  </script>
+
+  <style>
+    :root {
+      --primary: #00f2fe;
+      --secondary: #4facfe;
+      --accent-gold: #ffd700;
+      --accent-pink: #ff2a85;
+      --bg-dark: #070b19;
+      --card-bg: rgba(13, 22, 45, 0.85);
+      --card-border: rgba(0, 242, 254, 0.35);
+      --text-main: #ffffff;
+      --text-muted: #a0aec0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    #webgl-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      display: block;
+      cursor: grab;
+    }
+
+    #webgl-canvas:active {
+      cursor: grabbing;
+    }
+
+    /* UI Overlay Layer */
+    .ui-layer {
+      position: relative;
+      z-index: 10;
+      pointer-events: none;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+    }
+
+    /* Top Navigation / Status bar */
+    .header-bar {
+      pointer-events: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 18, 38, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 50px;
+      padding: 10px 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00f2fe, #4facfe, #ff2a85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.6);
+      animation: pulseGlow 3s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 10px rgba(0, 242, 254, 0.4); }
+      100% { box-shadow: 0 0 25px rgba(255, 42, 133, 0.8); }
+    }
+
+    .brand-text h1 {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ffffff, #a8d5ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 11px;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-btn:hover {
+      background: rgba(0, 242, 254, 0.25);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 242, 254, 0.3);
+    }
+
+    .control-btn.active {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      color: #070b19;
+      border-color: transparent;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+    }
+
+    /* Main Container with Ticket & 3D hints */
+    .main-content {
+      pointer-events: none;
+      display: grid;
+      grid-template-columns: 530px 1fr;
+      gap: 30px;
+      align-items: center;
+      max-width: 1400px;
+      margin: 20px auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* The VIP Invitation Ticket Card */
+    .ticket-card {
+      pointer-events: auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(25px);
+      border-radius: 28px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 242, 254, 0.1);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: cardEntrance 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes cardEntrance {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .ticket-card:hover {
+      box-shadow: 0 30px 80px rgba(0, 242, 254, 0.25), inset 0 0 30px rgba(0, 242, 254, 0.2);
+    }
+
+    /* Ticket Header Banner */
+    .ticket-header {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(79, 172, 254, 0.1) 100%);
+      border-bottom: 1px dashed rgba(0, 242, 254, 0.3);
+      padding: 24px 28px 20px;
+      position: relative;
+    }
+
+    .ticket-notch-left, .ticket-notch-right {
+      position: absolute;
+      bottom: -15px;
+      width: 30px;
+      height: 30px;
+      background: var(--bg-dark);
+      border-radius: 50%;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+    }
+    .ticket-notch-left { left: -15px; }
+    .ticket-notch-right { right: -15px; }
+
+    .ticket-badge-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .badge-pill {
+      background: linear-gradient(90deg, #ff2a85, #ff7300);
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(255, 42, 133, 0.4);
+    }
+
+    .ticket-code {
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      color: var(--accent-gold);
+      letter-spacing: 2px;
+    }
+
+    .ticket-title-area h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #90cdf4;
+      margin-bottom: 4px;
+    }
+
+    .ticket-title-area h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+      line-height: 1.2;
+    }
+
+    /* Ticket Body */
+    .ticket-body {
+      padding: 26px 28px;
+    }
+
+    .welcome-text {
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #e2e8f0;
+      margin-bottom: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 14px 18px;
+      border-radius: 14px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .welcome-text strong {
+      color: var(--accent-gold);
+    }
+
+    /* Objective Box */
+    .objective-box {
+      background: rgba(0, 242, 254, 0.06);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+
+    .objective-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .objective-content {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    /* Info Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .info-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .info-card:hover {
+      background: rgba(0, 242, 254, 0.08);
+      border-color: rgba(0, 242, 254, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .info-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(79, 172, 254, 0.1));
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .info-detail h4 {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+
+    .info-detail p {
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .teacher-card {
+      grid-column: span 2;
+      background: linear-gradient(90deg, rgba(255, 42, 133, 0.12), rgba(0, 242, 254, 0.12));
+      border: 1px solid rgba(255, 42, 133, 0.3);
+    }
+
+    /* Ticket Footer with Barcode & Buttons */
+    .ticket-footer {
+      border-top: 1px dashed rgba(255, 255, 255, 0.15);
+      padding-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .barcode-area {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .fake-barcode {
+      display: flex;
+      gap: 2px;
+      height: 32px;
+      align-items: stretch;
+    }
+
+    .bar {
+      background: white;
+      opacity: 0.85;
+      border-radius: 1px;
+    }
+
+    .barcode-text {
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--text-muted);
+    }
+
+    .ticket-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-print {
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+      color: #050d24;
+      font-weight: 800;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 20px rgba(0, 242, 254, 0.4);
+      transition: all 0.25s ease;
+    }
+
+    .btn-print:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 28px rgba(0, 242, 254, 0.6);
+    }
+
+    /* Interactive 3D HUD / Floating Help on Right */
+    .scene-hud {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 16px;
+    }
+
+    .hud-box {
+      background: rgba(10, 20, 42, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      border-radius: 20px;
+      padding: 18px 22px;
+      max-width: 320px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .hud-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--primary);
+      font-weight: 800;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-desc {
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .hud-button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .mini-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      padding: 7px 13px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mini-btn:hover {
+      background: rgba(0, 242, 254, 0.25);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    /* Speech Bubble for Robot */
+    .robot-speech-bubble {
+      pointer-events: auto;
+      background: linear-gradient(135deg, rgba(255, 42, 133, 0.92), rgba(120, 40, 200, 0.92));
+      color: white;
+      padding: 14px 20px;
+      border-radius: 20px;
+      border-bottom-left-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      max-width: 290px;
+      box-shadow: 0 10px 30px rgba(255, 42, 133, 0.4);
+      animation: floatBubble 3s ease-in-out infinite alternate;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes floatBubble {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-8px); }
+    }
+
+    /* Bottom Info Status Bar */
+    .footer-bar {
+      pointer-events: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(7, 11, 25, 0.85);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 30px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-radius: 20px;
+      margin-top: 20px;
+    }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* Printable Ticket Styles */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+
+      #webgl-canvas, .ui-layer .header-bar, .scene-hud, .footer-bar, #confetti-canvas, .btn-print, .nav-controls {
+        display: none !important;
+      }
+
+      .ui-layer {
+        padding: 0 !important;
+        display: block !important;
+      }
+
+      .main-content {
+        display: block !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+      }
+
+      .ticket-card {
+        background: white !important;
+        color: black !important;
+        border: 2px solid #000 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        width: 100% !important;
+        max-width: 650px !important;
+        margin: 20px auto !important;
+        border-radius: 16px !important;
+      }
+
+      .ticket-header {
+        background: #f0f4f8 !important;
+        border-bottom: 2px dashed #333 !important;
+      }
+
+      .badge-pill {
+        background: #333 !important;
+        color: #fff !important;
+        box-shadow: none !important;
+      }
+
+      .ticket-code {
+        color: #111 !important;
+      }
+
+      .ticket-title-area h2 {
+        color: #333 !important;
+      }
+
+      .ticket-title-area h3 {
+        color: #000 !important;
+        text-shadow: none !important;
+      }
+
+      .welcome-text {
+        background: #f8fafc !important;
+        color: #111 !important;
+        border-left: 4px solid #0056b3 !important;
+      }
+
+      .welcome-text strong {
+        color: #0056b3 !important;
+      }
+
+      .objective-box {
+        background: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000 !important;
+      }
+
+      .objective-label {
+        color: #0056b3 !important;
+      }
+
+      .objective-content {
+        color: #222 !important;
+      }
+
+      .info-card {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+
+      .info-detail h4 {
+        color: #555 !important;
+      }
+
+      .info-detail p {
+        color: #000 !important;
+      }
+
+      .teacher-card {
+        background: #f0fdf4 !important;
+        border: 1px solid #86efac !important;
+      }
+
+      .teacher-card .info-detail p {
+        color: #166534 !important;
+      }
+
+      .fake-barcode .bar {
+        background: #000 !important;
+      }
+
+      .ticket-notch-left, .ticket-notch-right {
+        display: none !important;
+      }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 1024px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+      .scene-hud {
+        align-items: center;
+      }
+      .hud-box {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WebGL 3D Canvas -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- Confetti particle Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- UI Overlay -->
+  <div class="ui-layer">
+    
+    <!-- Top Header -->
+    <header class="header-bar">
+      <div class="brand">
+        <div class="brand-icon">✨</div>
+        <div class="brand-text">
+          <h1>ИНФОРМАТИКА • 3D ГРАФИКА</h1>
+          <p>7 «Ә» СЫНЫБЫ • АШЫҚ САБАҚ</p>
+        </div>
+      </div>
+      <div class="nav-controls">
+        <button class="control-btn" id="btn-toggle-cam">
+          <span>🔄</span> 3D Айналдыру
+        </button>
+        <button class="control-btn" id="btn-wave">
+          <span>👋</span> Робот амандасуы
+        </button>
+        <button class="control-btn" id="btn-music">
+          <span>🎵</span> Әуен қосу
+        </button>
+        <button class="control-btn" id="btn-confetti">
+          <span>🎉</span> Шашу
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- VIP Invitation Ticket Card -->
+      <section class="ticket-card" id="ticket">
+        <div class="ticket-header">
+          <div class="ticket-notch-left"></div>
+          <div class="ticket-notch-right"></div>
+          
+          <div class="ticket-badge-row">
+            <span class="badge-pill">★ ШАҚЫРУ БИЛЕТІ ★</span>
+            <span class="ticket-code">№ 3D-0411-2026</span>
+          </div>
+
+          <div class="ticket-title-area">
+            <h2>Информатика пәні бойынша ашық сабақ</h2>
+            <h3>«Үш өлшемді графика»</h3>
+          </div>
+        </div>
+
+        <div class="ticket-body">
+          <div class="welcome-text">
+            <strong>Құрметті әріптестер мен қонақтар!</strong><br>
+            Сіздерді 7 «Ә» сыныбында өтетін <strong>«Үш өлшемді графика»</strong> тақырыбындағы ашық сабағымыздың қадірлі қонағы болуға шын жүректен шақырамыз!
+          </div>
+
+          <!-- Objective Box -->
+          <div class="objective-box">
+            <div class="objective-label">
+              <span>🎯</span> Сабақтың оқу мақсаты:
+            </div>
+            <div class="objective-content">
+              <strong>7.3.2.1</strong> — Компьютерлік модельдерді қолдануға мысалдар келтіру
+            </div>
+          </div>
+
+          <!-- Info Grid -->
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="info-icon">📅</div>
+              <div class="info-detail">
+                <h4>Өтетін күні</h4>
+                <p>04.11.2026 ж.</p>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-icon">⏰</div>
+              <div class="info-detail">
+                <h4>Басталу уақыты</h4>
+                <p>9:40</p>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-icon">🏫</div>
+              <div class="info-detail">
+                <h4>Сыныбы</h4>
+                <p>7 «Ә» сыныбы</p>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-icon">🚪</div>
+              <div class="info-detail">
+                <h4>Өтетін орны</h4>
+                <p>208-кабинет</p>
+              </div>
+            </div>
+
+            <div class="info-card teacher-card">
+              <div class="info-icon" style="background: linear-gradient(135deg,#ff2a85,#ff7300);">👩‍🏫</div>
+              <div class="info-detail">
+                <h4>Пән мұғалімі</h4>
+                <p style="color: #ffd700; font-size: 16px;">Асқарова Айнұр</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ticket Footer -->
+          <div class="ticket-footer">
+            <div class="barcode-area">
+              <div class="fake-barcode" id="barcode"></div>
+              <div class="barcode-text">INVITATION 2026 VIP</div>
+            </div>
+
+            <div class="ticket-actions">
+              <button class="btn-print" onclick="window.print()">
+                <span>🖨️</span> Билетті басып шығару
+              </button>
+              <a href="ticket_print.html" class="btn-print" style="background: rgba(255,255,255,0.1); border: 1px solid var(--primary); color: white; text-decoration: none;">
+                <span>📄</span> А4 нұсқасы (2 дана)
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right HUD with Robot Message and 3D Controls -->
+      <section class="scene-hud">
+        
+        <div class="robot-speech-bubble" id="speech-bubble">
+          💐 Сәлеметсіздер ме! Мен гүл шоғымен Сіздерді 3D графика әлеміне шақырамын!
+        </div>
+
+        <div class="hud-box">
+          <div class="hud-title">
+            <span>🎮</span> 3D Интерактивті кеңістік
+          </div>
+          <div class="hud-desc">
+            Тышқанмен (мышкамен) немесе саусақпен 3D робот пен айналмалы геометриялық пішіндерді 360° еркін бұрып көре аласыз.
+          </div>
+          <div class="hud-button-group">
+            <button class="mini-btn" id="btn-focus-robot">🤖 Роботқа жақындау</button>
+            <button class="mini-btn" id="btn-focus-shapes">💎 3D Фигуралар</button>
+            <button class="mini-btn" id="btn-toggle-ticket">👁️ Билетті тасалау</button>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Bottom Footer -->
+    <footer class="footer-bar">
+      <div>🌐 Үш өлшемді модельдеу, виртуалды кеңістік және 3D анимация</div>
+      <div>Мұғалім: <strong>Асқарова Айнұр</strong> • 2026 оқу жылы</div>
+    </footer>
+
+  </div>
+
+  <!-- Three.js 3D Interactive Scene Script -->
+  <script>
+    // Build Fake Barcode Lines
+    (function createBarcode() {
+      const container = document.getElementById('barcode');
+      const widths = [2, 1, 3, 2, 4, 1, 2, 3, 1, 4, 2, 1, 3, 1, 2, 4, 1, 3, 2, 1, 2, 3, 4, 1, 2];
+      widths.forEach(w => {
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.width = w + 'px';
+        container.appendChild(bar);
+      });
+    })();
+
+    // Setup WebGL Scene
+    const canvas = document.getElementById('webgl-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x070b19, 0.035);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(2.5, 1.8, 6.5);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxDistance = 14;
+    controls.minDistance = 2.5;
+    controls.maxPolarAngle = Math.PI / 2 + 0.1; // don't go below floor
+    controls.target.set(1.2, 0.6, 0);
+
+    // Resize Handler
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(5, 8, 5);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Cyber Cyan and Pink Rim lights
+    const cyanLight = new THREE.PointLight(0x00f2fe, 3, 15);
+    cyanLight.position.set(-4, 3, 2);
+    scene.add(cyanLight);
+
+    const pinkLight = new THREE.PointLight(0xff2a85, 3, 15);
+    pinkLight.position.set(4, 2, -2);
+    scene.add(pinkLight);
+
+    const floorGlow = new THREE.PointLight(0x4facfe, 2, 8);
+    floorGlow.position.set(1.5, -1, 0);
+    scene.add(floorGlow);
+
+    // Cyber Grid Floor
+    const gridHelper = new THREE.GridHelper(30, 30, 0x00f2fe, 0x162347);
+    gridHelper.position.y = -1.2;
+    scene.add(gridHelper);
+
+    // Glowing Cyber Platform for Robot
+    const platformGeo = new THREE.CylinderGeometry(1.4, 1.6, 0.2, 32);
+    const platformMat = new THREE.MeshStandardMaterial({
+      color: 0x0d1c38,
+      metalness: 0.9,
+      roughness: 0.2,
+      emissive: 0x002c5c
+    });
+    const platform = new THREE.Mesh(platformGeo, platformMat);
+    platform.position.set(1.8, -1.1, 0);
+    platform.receiveShadow = true;
+    scene.add(platform);
+
+    const ringGeo = new THREE.RingGeometry(1.45, 1.55, 32);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe, side: THREE.DoubleSide });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(1.8, -0.99, 0);
+    scene.add(ring);
+
+    // ==========================================
+    // 3D GEOMETRIC SHAPES (Үш өлшемді графика)
+    // ==========================================
+    const shapesGroup = new THREE.Group();
+    scene.add(shapesGroup);
+
+    // 1. Torus Knot (Holographic / Metallic)
+    const knotGeo = new THREE.TorusKnotGeometry(0.5, 0.16, 100, 16);
+    const knotMat = new THREE.MeshStandardMaterial({
+      color: 0x9b51e0,
+      metalness: 0.85,
+      roughness: 0.15,
+      emissive: 0x3a0078
+    });
+    const torusKnot = new THREE.Mesh(knotGeo, knotMat);
+    torusKnot.position.set(-1.8, 1.8, -1);
+    torusKnot.castShadow = true;
+    shapesGroup.add(torusKnot);
+
+    // 2. Wireframe Icosahedron
+    const icosaGeo = new THREE.IcosahedronGeometry(0.65, 0);
+    const icosaMat = new THREE.MeshStandardMaterial({
+      color: 0x00f2fe,
+      wireframe: true,
+      wireframeLinewidth: 2,
+      emissive: 0x0088aa
+    });
+    const icosahedron = new THREE.Mesh(icosaGeo, icosaMat);
+    icosahedron.position.set(-1.2, 0.2, 1.2);
+    shapesGroup.add(icosahedron);
+
+    // 2b. Solid crystal inside icosahedron
+    const innerCrystalGeo = new THREE.OctahedronGeometry(0.35, 0);
+    const innerCrystalMat = new THREE.MeshStandardMaterial({
+      color: 0xffd700,
+      metalness: 0.9,
+      roughness: 0.1,
+      emissive: 0x553300
+    });
+    const innerCrystal = new THREE.Mesh(innerCrystalGeo, innerCrystalMat);
+    innerCrystal.position.copy(icosahedron.position);
+    shapesGroup.add(innerCrystal);
+
+    // 3. Rotating 3D Coordinate System Grid (X, Y, Z axes with glowing arrows)
+    const axesGroup = new THREE.Group();
+    axesGroup.position.set(-1.6, -0.4, -0.5);
+    const axisLen = 0.8;
+    
+    // X - Red
+    const arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), axisLen, 0xff3366, 0.2, 0.1);
+    // Y - Green
+    const arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), axisLen, 0x00ff88, 0.2, 0.1);
+    // Z - Blue
+    const arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), axisLen, 0x00f2fe, 0.2, 0.1);
+    axesGroup.add(arrowX, arrowY, arrowZ);
+    shapesGroup.add(axesGroup);
+
+    // 4. Floating Holographic Rings
+    const holoRing1Geo = new THREE.TorusGeometry(0.7, 0.02, 16, 100);
+    const holoRingMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.7 });
+    const holoRing1 = new THREE.Mesh(holoRing1Geo, holoRingMat);
+    holoRing1.position.set(3.8, 2.0, -1.5);
+    shapesGroup.add(holoRing1);
+
+    const holoRing2Geo = new THREE.TorusGeometry(0.5, 0.02, 16, 100);
+    const holoRing2Mat = new THREE.MeshBasicMaterial({ color: 0xff2a85, transparent: true, opacity: 0.7 });
+    const holoRing2 = new THREE.Mesh(holoRing2Geo, holoRing2Mat);
+    holoRing2.position.set(3.8, 2.0, -1.5);
+    shapesGroup.add(holoRing2);
+
+    // 5. Floating Cube with faceted edges
+    const boxGeo = new THREE.BoxGeometry(0.6, 0.6, 0.6);
+    const boxMat = new THREE.MeshStandardMaterial({
+      color: 0x00f2fe,
+      metalness: 0.7,
+      roughness: 0.2,
+      transparent: true,
+      opacity: 0.85
+    });
+    const floatingBox = new THREE.Mesh(boxGeo, boxMat);
+    floatingBox.position.set(3.6, 0.4, 0.8);
+    shapesGroup.add(floatingBox);
+
+    const boxEdges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(boxGeo),
+      new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 })
+    );
+    floatingBox.add(boxEdges);
+
+
+    // ==========================================
+    // 3D ROBOT WITH BOUQUET OF FLOWERS
+    // ==========================================
+    const robotGroup = new THREE.Group();
+    robotGroup.position.set(1.8, -0.2, 0);
+    scene.add(robotGroup);
+
+    // Robot Materials
+    const bodyWhiteMat = new THREE.MeshStandardMaterial({
+      color: 0xf0f4f8,
+      metalness: 0.6,
+      roughness: 0.25
+    });
+    const bodyMetalMat = new THREE.MeshStandardMaterial({
+      color: 0x22324d,
+      metalness: 0.8,
+      roughness: 0.3
+    });
+    const cyanGlowMat = new THREE.MeshStandardMaterial({
+      color: 0x00f2fe,
+      emissive: 0x00f2fe,
+      emissiveIntensity: 0.9,
+      roughness: 0.2
+    });
+    const darkVisorMat = new THREE.MeshStandardMaterial({
+      color: 0x070c1a,
+      metalness: 0.9,
+      roughness: 0.1
+    });
+
+    // 1. Robot Torus/Pelvis Base
+    const pelvisGeo = new THREE.CylinderGeometry(0.3, 0.25, 0.2, 16);
+    const pelvis = new THREE.Mesh(pelvisGeo, bodyMetalMat);
+    pelvis.position.y = -0.15;
+    robotGroup.add(pelvis);
+
+    // 2. Robot Torso
+    const torsoGeo = new THREE.CylinderGeometry(0.42, 0.35, 0.7, 24);
+    const torso = new THREE.Mesh(torsoGeo, bodyWhiteMat);
+    torso.position.y = 0.3;
+    torso.castShadow = true;
+    robotGroup.add(torso);
+
+    // Glowing Chest Core (Heart / Lesson Emblem)
+    const chestCoreGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.05, 16);
+    const chestCore = new THREE.Mesh(chestCoreGeo, cyanGlowMat);
+    chestCore.rotation.x = Math.PI / 2;
+    chestCore.position.set(0, 0.38, 0.4);
+    robotGroup.add(chestCore);
+
+    // Collar / Neck
+    const neckGeo = new THREE.CylinderGeometry(0.18, 0.2, 0.1, 16);
+    const neck = new THREE.Mesh(neckGeo, bodyMetalMat);
+    neck.position.y = 0.7;
+    robotGroup.add(neck);
+
+    // 3. Robot Head
+    const headGroup = new THREE.Group();
+    headGroup.position.y = 0.98;
+    robotGroup.add(headGroup);
+
+    // Head Base (Rounded Box / Cylinder)
+    const headGeo = new THREE.CylinderGeometry(0.35, 0.32, 0.45, 24);
+    const headMesh = new THREE.Mesh(headGeo, bodyWhiteMat);
+    headMesh.castShadow = true;
+    headGroup.add(headMesh);
+
+    // Head Top Cap (Sphere Dome)
+    const domeGeo = new THREE.SphereGeometry(0.35, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
+    const domeMesh = new THREE.Mesh(domeGeo, bodyWhiteMat);
+    domeMesh.position.y = 0.225;
+    headGroup.add(domeMesh);
+
+    // Visor Screen (Dark Curved Visor)
+    const visorGeo = new THREE.CylinderGeometry(0.36, 0.34, 0.22, 24, 1, false, -Math.PI * 0.35, Math.PI * 0.7);
+    const visorMesh = new THREE.Mesh(visorGeo, darkVisorMat);
+    visorMesh.position.set(0, 0.02, 0);
+    headGroup.add(visorMesh);
+
+    // Cute Glowing Blue Eyes
+    const eyeGeo = new THREE.SphereGeometry(0.065, 16, 16);
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+    
+    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+    leftEye.position.set(-0.13, 0.03, 0.34);
+    leftEye.scale.set(1, 0.7, 0.4);
+    headGroup.add(leftEye);
+
+    const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+    rightEye.position.set(0.13, 0.03, 0.34);
+    rightEye.scale.set(1, 0.7, 0.4);
+    headGroup.add(rightEye);
+
+    // Friendly Smile (Torus curve)
+    const smileGeo = new THREE.TorusGeometry(0.07, 0.015, 8, 16, Math.PI);
+    const smileMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+    const smile = new THREE.Mesh(smileGeo, smileMat);
+    smile.rotation.z = Math.PI;
+    smile.position.set(0, -0.06, 0.35);
+    headGroup.add(smile);
+
+    // Robot Antennas on ears
+    const earGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.1, 12);
+    const earLeft = new THREE.Mesh(earGeo, bodyMetalMat);
+    earLeft.rotation.z = Math.PI / 2;
+    earLeft.position.set(-0.38, 0.05, 0);
+    headGroup.add(earLeft);
+
+    const earRight = earLeft.clone();
+    earRight.position.x = 0.38;
+    headGroup.add(earRight);
+
+    // Antenna on top
+    const antennaStemGeo = new THREE.CylinderGeometry(0.015, 0.02, 0.2, 8);
+    const antennaStem = new THREE.Mesh(antennaStemGeo, bodyMetalMat);
+    antennaStem.position.y = 0.65;
+    headGroup.add(antennaStem);
+
+    const antennaBallGeo = new THREE.SphereGeometry(0.05, 16, 16);
+    const antennaBallMat = new THREE.MeshStandardMaterial({
+      color: 0xff2a85,
+      emissive: 0xff2a85,
+      emissiveIntensity: 0.9
+    });
+    const antennaBall = new THREE.Mesh(antennaBallGeo, antennaBallMat);
+    antennaBall.position.y = 0.76;
+    headGroup.add(antennaBall);
+
+    // 4. Robot Legs
+    function createLeg(xOffset) {
+      const legGroup = new THREE.Group();
+      legGroup.position.set(xOffset, -0.25, 0);
+
+      // Thigh
+      const thighGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.35, 16);
+      const thigh = new THREE.Mesh(thighGeo, bodyWhiteMat);
+      thigh.position.y = -0.15;
+      legGroup.add(thigh);
+
+      // Knee Joint
+      const kneeGeo = new THREE.SphereGeometry(0.09, 12, 12);
+      const knee = new THREE.Mesh(kneeGeo, bodyMetalMat);
+      knee.position.y = -0.32;
+      legGroup.add(knee);
+
+      // Shin
+      const shinGeo = new THREE.CylinderGeometry(0.08, 0.07, 0.35, 16);
+      const shin = new THREE.Mesh(shinGeo, bodyWhiteMat);
+      shin.position.y = -0.5;
+      legGroup.add(shin);
+
+      // Foot / Boot
+      const footGeo = new THREE.BoxGeometry(0.18, 0.12, 0.28);
+      const foot = new THREE.Mesh(footGeo, bodyMetalMat);
+      foot.position.set(0, -0.7, 0.05);
+      legGroup.add(foot);
+
+      return legGroup;
+    }
+
+    const leftLeg = createLeg(-0.2);
+    const rightLeg = createLeg(0.2);
+    robotGroup.add(leftLeg, rightLeg);
+
+    // 5. Right Arm (Waving Arm)
+    const rightArmPivot = new THREE.Group();
+    rightArmPivot.position.set(0.48, 0.52, 0); // right shoulder
+    robotGroup.add(rightArmPivot);
+
+    const shoulderJointR = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 12), bodyMetalMat);
+    rightArmPivot.add(shoulderJointR);
+
+    // Upper arm
+    const upperArmR = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.06, 0.28, 12), bodyWhiteMat);
+    upperArmR.position.set(0.1, 0.12, 0);
+    upperArmR.rotation.z = -Math.PI / 4;
+    rightArmPivot.add(upperArmR);
+
+    // Forearm & Hand Pivot for Waving
+    const rightForearmPivot = new THREE.Group();
+    rightForearmPivot.position.set(0.22, 0.22, 0);
+    rightArmPivot.add(rightForearmPivot);
+
+    const forearmR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.25, 12), bodyWhiteMat);
+    forearmR.position.y = 0.12;
+    rightForearmPivot.add(forearmR);
+
+    const handR = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), bodyMetalMat);
+    handR.position.y = 0.26;
+    rightForearmPivot.add(handR);
+
+    // Cute fingers
+    for (let f = -1; f <= 1; f++) {
+      const finger = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.08, 8), bodyMetalMat);
+      finger.position.set(f * 0.035, 0.32, 0);
+      rightForearmPivot.add(finger);
+    }
+
+    // 6. Left Arm (Holding the Bouquet of Flowers)
+    const leftArmPivot = new THREE.Group();
+    leftArmPivot.position.set(-0.46, 0.52, 0);
+    robotGroup.add(leftArmPivot);
+
+    const shoulderJointL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 12), bodyMetalMat);
+    leftArmPivot.add(shoulderJointL);
+
+    const upperArmL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.06, 0.3, 12), bodyWhiteMat);
+    upperArmL.position.set(-0.06, -0.15, 0.08);
+    upperArmL.rotation.x = -Math.PI / 6;
+    upperArmL.rotation.z = 0.2;
+    leftArmPivot.add(upperArmL);
+
+    const forearmL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.055, 0.28, 12), bodyWhiteMat);
+    forearmL.position.set(-0.05, -0.22, 0.22);
+    forearmL.rotation.x = -Math.PI / 3;
+    leftArmPivot.add(forearmL);
+
+    const handL = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), bodyMetalMat);
+    handL.position.set(-0.04, -0.16, 0.38);
+    leftArmPivot.add(handL);
+
+    // ==========================================
+    // 3D BOUQUET OF FLOWERS (Гүл шоғы)
+    // ==========================================
+    const bouquetGroup = new THREE.Group();
+    bouquetGroup.position.set(-0.04, -0.1, 0.42);
+    bouquetGroup.rotation.x = 0.2;
+    bouquetGroup.rotation.z = -0.15;
+    leftArmPivot.add(bouquetGroup);
+
+    // Wrapping Cone Paper (Pastel Pink / Golden Trim)
+    const coneGeo = new THREE.ConeGeometry(0.24, 0.5, 16, 1, true);
+    const coneMat = new THREE.MeshStandardMaterial({
+      color: 0xffd1dc,
+      roughness: 0.5,
+      metalness: 0.1,
+      side: THREE.DoubleSide
+    });
+    const wrapperCone = new THREE.Mesh(coneGeo, coneMat);
+    wrapperCone.rotation.x = Math.PI; // point downwards
+    wrapperCone.position.y = -0.1;
+    bouquetGroup.add(wrapperCone);
+
+    // Golden Ribbon
+    const ribbonGeo = new THREE.TorusGeometry(0.12, 0.03, 8, 24);
+    const ribbonMat = new THREE.MeshStandardMaterial({
+      color: 0xffd700,
+      metalness: 0.8,
+      roughness: 0.2
+    });
+    const ribbon = new THREE.Mesh(ribbonGeo, ribbonMat);
+    ribbon.position.y = -0.05;
+    ribbon.rotation.x = Math.PI / 2;
+    bouquetGroup.add(ribbon);
+
+    // Green Stems & Leaves
+    const stemMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.6 });
+    const leafGeo = new THREE.ConeGeometry(0.06, 0.18, 4);
+    leafGeo.scale(1, 1, 0.3);
+
+    for (let i = 0; i < 5; i++) {
+      const angle = (i / 5) * Math.PI * 2;
+      const leaf = new THREE.Mesh(leafGeo, stemMat);
+      leaf.position.set(Math.cos(angle) * 0.18, 0.15, Math.sin(angle) * 0.18);
+      leaf.rotation.x = Math.cos(angle) * 0.8;
+      leaf.rotation.z = Math.sin(angle) * 0.8;
+      bouquetGroup.add(leaf);
+    }
+
+    // Flower creation helper
+    function createFlower(colorHex, size = 1) {
+      const flower = new THREE.Group();
+      
+      // Center disc
+      const discGeo = new THREE.SphereGeometry(0.045 * size, 8, 8);
+      const discMat = new THREE.MeshStandardMaterial({ color: 0xffe600, roughness: 0.3 });
+      const disc = new THREE.Mesh(discGeo, discMat);
+      flower.add(disc);
+
+      // Petals
+      const petalMat = new THREE.MeshStandardMaterial({
+        color: colorHex,
+        roughness: 0.35,
+        metalness: 0.15
+      });
+      const numPetals = 6;
+      for (let p = 0; p < numPetals; p++) {
+        const pAngle = (p / numPetals) * Math.PI * 2;
+        const petalGeo = new THREE.SphereGeometry(0.04 * size, 8, 8);
+        petalGeo.scale(0.8, 1.4, 0.4);
+        const petal = new THREE.Mesh(petalGeo, petalMat);
+        petal.position.set(Math.cos(pAngle) * 0.065 * size, Math.sin(pAngle) * 0.065 * size, 0);
+        petal.rotation.z = pAngle + Math.PI / 2;
+        flower.add(petal);
+      }
+      return flower;
+    }
+
+    // Add vibrant flowers to bouquet
+    const flowersData = [
+      { color: 0xff1744, x: 0, y: 0.28, z: 0, s: 1.2 },        // Bright Red Rose in center
+      { color: 0xff007f, x: -0.1, y: 0.24, z: 0.08, s: 1.0 },   // Pink
+      { color: 0xff9100, x: 0.11, y: 0.25, z: 0.06, s: 1.05 },  // Orange
+      { color: 0xd500f9, x: 0.0, y: 0.26, z: -0.1, s: 1.0 },    // Purple
+      { color: 0x00e5ff, x: -0.12, y: 0.22, z: -0.06, s: 0.95 },// Cyber Cyan Tulip
+      { color: 0xffea00, x: 0.12, y: 0.22, z: -0.07, s: 1.0 },  // Golden Yellow
+      { color: 0xff4081, x: 0.05, y: 0.32, z: 0.02, s: 1.1 }    // Top Pink Rose
+    ];
+
+    flowersData.forEach(data => {
+      const fl = createFlower(data.color, data.s);
+      fl.position.set(data.x, data.y, data.z);
+      fl.rotation.x = -Math.PI / 4 + (Math.random() - 0.5) * 0.4;
+      fl.rotation.y = (Math.random() - 0.5) * 0.4;
+      bouquetGroup.add(fl);
+    });
+
+    // Magic pollen particles floating around bouquet
+    const pollenCount = 35;
+    const pollenGeo = new THREE.BufferGeometry();
+    const pollenPos = new Float32Array(pollenCount * 3);
+    for (let i = 0; i < pollenCount * 3; i += 3) {
+      pollenPos[i] = (Math.random() - 0.5) * 0.6;
+      pollenPos[i + 1] = 0.2 + Math.random() * 0.4;
+      pollenPos[i + 2] = (Math.random() - 0.5) * 0.6;
+    }
+    pollenGeo.setAttribute('position', new THREE.BufferAttribute(pollenPos, 3));
+    const pollenMat = new THREE.PointsMaterial({
+      color: 0xfff077,
+      size: 0.035,
+      transparent: true,
+      opacity: 0.85
+    });
+    const pollen = new THREE.Points(pollenGeo, pollenMat);
+    bouquetGroup.add(pollen);
+
+    // Ambient Cosmic Floating Dust Particles
+    const dustCount = 200;
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPos = new Float32Array(dustCount * 3);
+    for (let i = 0; i < dustCount * 3; i += 3) {
+      dustPos[i] = (Math.random() - 0.5) * 16;
+      dustPos[i + 1] = (Math.random() - 0.5) * 10;
+      dustPos[i + 2] = (Math.random() - 0.5) * 12;
+    }
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+    const dustMat = new THREE.PointsMaterial({
+      color: 0x4facfe,
+      size: 0.05,
+      transparent: true,
+      opacity: 0.6
+    });
+    const dust = new THREE.Points(dustGeo, dustMat);
+    scene.add(dust);
+
+    // ==========================================
+    // INTERACTION & ANIMATION LOOP
+    // ==========================================
+    let isAutoRotating = true;
+    let waveActive = false;
+    let waveStartTime = 0;
+
+    // Button: Toggle Camera Auto-rotation
+    const btnToggleCam = document.getElementById('btn-toggle-cam');
+    btnToggleCam.addEventListener('click', () => {
+      isAutoRotating = !isAutoRotating;
+      btnToggleCam.classList.toggle('active', isAutoRotating);
+    });
+    btnToggleCam.classList.add('active');
+
+    // Button: Robot Wave Hello
+    const btnWave = document.getElementById('btn-wave');
+    const speechBubble = document.getElementById('speech-bubble');
+    btnWave.addEventListener('click', triggerRobotWave);
+
+    function triggerRobotWave() {
+      waveActive = true;
+      waveStartTime = performance.now();
+      playTone(587.33, 0.15); // D5
+      setTimeout(() => playTone(880, 0.25), 150); // A5
+      speechBubble.innerHTML = "💐 Қош келдіңіздер! «Үш өлшемді графика» сабағында кездескенше!";
+      speechBubble.style.transform = "scale(1.08)";
+      setTimeout(() => speechBubble.style.transform = "scale(1)", 400);
+    }
+
+    // Mini HUD Camera focus buttons
+    document.getElementById('btn-focus-robot').addEventListener('click', () => {
+      controls.target.set(1.8, 0.3, 0);
+      camera.position.set(2.8, 1.2, 3.5);
+    });
+
+    document.getElementById('btn-focus-shapes').addEventListener('click', () => {
+      controls.target.set(-1.2, 0.8, 0);
+      camera.position.set(-1.2, 1.8, 4.5);
+    });
+
+    document.getElementById('btn-toggle-ticket').addEventListener('click', () => {
+      const ticket = document.getElementById('ticket');
+      const isHidden = ticket.style.display === 'none';
+      ticket.style.display = isHidden ? 'block' : 'none';
+      document.getElementById('btn-toggle-ticket').innerHTML = isHidden ? '👁️ Билетті тасалау' : '👁️ Билетті көрсету';
+    });
+
+    // Eye blinking
+    let lastBlink = 0;
+    function checkBlink(time) {
+      if (time - lastBlink > 4) {
+        leftEye.scale.y = 0.05;
+        rightEye.scale.y = 0.05;
+        if (time - lastBlink > 4.15) {
+          leftEye.scale.y = 0.7;
+          rightEye.scale.y = 0.7;
+          lastBlink = time;
+        }
+      }
+    }
+
+    // Main Render Loop
+    let clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const elapsedTime = clock.getElapsedTime();
+
+      // Controls update
+      controls.update();
+
+      // Auto-rotation of scene / camera when active
+      if (isAutoRotating) {
+        shapesGroup.rotation.y = elapsedTime * 0.35;
+      }
+
+      // Rotate Individual 3D Geometric Shapes
+      torusKnot.rotation.x = elapsedTime * 0.7;
+      torusKnot.rotation.y = elapsedTime * 0.9;
+
+      icosahedron.rotation.x = elapsedTime * 0.6;
+      icosahedron.rotation.y = elapsedTime * 0.8;
+      innerCrystal.rotation.y = -elapsedTime * 1.2;
+
+      floatingBox.rotation.x = elapsedTime * 0.5;
+      floatingBox.rotation.z = elapsedTime * 0.7;
+
+      holoRing1.rotation.x = elapsedTime * 0.8;
+      holoRing1.rotation.y = elapsedTime * 0.5;
+      holoRing2.rotation.y = -elapsedTime * 0.9;
+      holoRing2.rotation.z = elapsedTime * 0.6;
+
+      // Coordinate axes slight bobbing
+      axesGroup.rotation.y = Math.sin(elapsedTime * 0.8) * 0.4;
+
+      // Robot floating / breathing motion
+      const floatY = Math.sin(elapsedTime * 2.2) * 0.06;
+      robotGroup.position.y = -0.2 + floatY;
+
+      // Head slight looking around
+      headGroup.rotation.y = Math.sin(elapsedTime * 1.2) * 0.15;
+      headGroup.rotation.x = Math.sin(elapsedTime * 1.5) * 0.05;
+
+      // Antenna glowing pulse
+      antennaBallMat.emissiveIntensity = 0.6 + Math.sin(elapsedTime * 5) * 0.4;
+      chestCore.material.emissiveIntensity = 0.7 + Math.sin(elapsedTime * 4) * 0.3;
+
+      // Eye blink
+      checkBlink(elapsedTime);
+
+      // Waving Hand Animation
+      if (waveActive) {
+        const waveProgress = (performance.now() - waveStartTime) / 1000;
+        if (waveProgress < 3.5) {
+          rightForearmPivot.rotation.z = Math.sin(waveProgress * 12) * 0.55;
+          rightArmPivot.rotation.z = -0.3 + Math.sin(waveProgress * 6) * 0.15;
+        } else {
+          waveActive = false;
+        }
+      } else {
+        rightForearmPivot.rotation.z = Math.sin(elapsedTime * 1.8) * 0.12;
+        rightArmPivot.rotation.z = Math.sin(elapsedTime * 1.2) * 0.05;
+      }
+
+      // Bouquet gentle sway
+      bouquetGroup.rotation.y = Math.sin(elapsedTime * 2) * 0.08;
+      bouquetGroup.rotation.x = 0.2 + Math.cos(elapsedTime * 2.2) * 0.05;
+
+      // Dust slow float
+      dust.rotation.y = elapsedTime * 0.03;
+
+      // Render 3D Scene
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // ==========================================
+    // AUDIO SYNTHESIZER (No external audio file)
+    // ==========================================
+    let audioCtx = null;
+    let isMusicPlaying = false;
+    let musicInterval = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, duration = 0.3, type = 'sine') {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    let noteIdx = 0;
+    const btnMusic = document.getElementById('btn-music');
+    btnMusic.addEventListener('click', () => {
+      initAudio();
+      isMusicPlaying = !isMusicPlaying;
+      btnMusic.classList.toggle('active', isMusicPlaying);
+      btnMusic.innerHTML = isMusicPlaying ? '<span>🔊</span> Әуенді тоқтату' : '<span>🎵</span> Әуен қосу';
+
+      if (isMusicPlaying) {
+        musicInterval = setInterval(() => {
+          const melody = [523.25, 659.25, 783.99, 659.25, 880, 783.99, 659.25, 587.33];
+          playTone(melody[noteIdx % melody.length], 0.45, 'triangle');
+          noteIdx++;
+        }, 550);
+      } else {
+        clearInterval(musicInterval);
+      }
+    });
+
+    // ==========================================
+    // CONFETTI CELEBRATION (Шашу)
+    // ==========================================
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const cctx = confettiCanvas.getContext('2d');
+    let confettiPieces = [];
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    class ConfettiPiece {
+      constructor() {
+        this.x = window.innerWidth * 0.5 + (Math.random() - 0.5) * 400;
+        this.y = window.innerHeight * 0.3;
+        this.vx = (Math.random() - 0.5) * 16;
+        this.vy = -Math.random() * 14 - 4;
+        this.size = Math.random() * 9 + 5;
+        this.color = ['#00f2fe', '#4facfe', '#ffd700', '#ff2a85', '#00ff88', '#ffffff'][Math.floor(Math.random() * 6)];
+        this.rot = Math.random() * Math.PI * 2;
+        this.vrot = (Math.random() - 0.5) * 0.3;
+        this.alpha = 1;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.4;
+        this.rot += this.vrot;
+        this.alpha -= 0.009;
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot);
+        ctx.fillStyle = this.color;
+        ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size * 0.6);
+        ctx.restore();
+      }
+    }
+
+    function triggerConfetti() {
+      for (let i = 0; i < 90; i++) {
+        confettiPieces.push(new ConfettiPiece());
+      }
+      playTone(784, 0.2);
+      setTimeout(() => playTone(1046.5, 0.3), 100);
+      triggerRobotWave();
+    }
+
+    document.getElementById('btn-confetti').addEventListener('click', triggerConfetti);
+
+    function renderConfetti() {
+      cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiPieces = confettiPieces.filter(p => p.alpha > 0);
+      confettiPieces.forEach(p => {
+        p.update();
+        p.draw(cctx);
+      });
+      requestAnimationFrame(renderConfetti);
+    }
+    renderConfetti();
+
+    // Auto welcome greeting after 1.2s
+    setTimeout(() => {
+      triggerConfetti();
+    }, 1200);
+  </script>
+</body>
+</html>
